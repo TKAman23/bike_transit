@@ -58,13 +58,13 @@ class _LoginPageState extends State<LoginPage> {
                   SignInButton(
                     Buttons.apple,
                     onPressed: () {
-                      // Handle Apple sign-in.
+                      // TODO: Handle Apple sign-in.
                     },
                   ),
                   SignInButton(
                     Buttons.facebook,
                     onPressed: () {
-                      // Handle Facebook sign-in.
+                      // TODO: Handle Facebook sign-in.
                     },
                   ),
                 ],
