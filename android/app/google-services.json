@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "168682830341",
+    "project_id": "project-52242ff7-f3b2-4a18-bde",
+    "storage_bucket": "project-52242ff7-f3b2-4a18-bde.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168682830341:android:72b60f7ecef2e698593a6c",
+        "android_client_info": {
+          "package_name": "com.example.bike_transit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBT8sujbFvCsykE44WQ6TypSIfcDEYRaAU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
