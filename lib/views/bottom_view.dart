@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 /// Header (control row + divider) height, excluding the bottom safe-area pad.
 const double sheetHeaderHeight = 10 + 50 + 10 + 1;
@@ -28,7 +29,9 @@ class BottomView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final snaps = [0.4].where((s) => s > minExtent + 0.02 && s < maxExtent - 0.02).toList();
+    final snaps = [0.4]
+        .where((s) => s > minExtent + 0.02 && s < maxExtent - 0.02)
+        .toList();
     return DraggableScrollableSheet(
       controller: controller,
       minChildSize: minExtent,
@@ -37,26 +40,29 @@ class BottomView extends StatelessWidget {
       snap: true,
       snapSizes: snaps,
       builder: (context, scroll) {
-        return Material(
-          color: colors.surface,
-          elevation: 8,
-          shadowColor: Colors.black45,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          clipBehavior: Clip.antiAlias,
-          child: CustomScrollView(
-            controller: scroll,
-            slivers: [
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _HeaderDelegate(
-                  height: sheetHeaderHeight,
-                  color: colors.surface,
-                  child: header,
+        // On web, keep clicks on the sheet from reaching the map underneath.
+        return PointerInterceptor(
+          child: Material(
+            color: colors.surface,
+            elevation: 8,
+            shadowColor: Colors.black45,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            clipBehavior: Clip.antiAlias,
+            child: CustomScrollView(
+              controller: scroll,
+              slivers: [
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _HeaderDelegate(
+                    height: sheetHeaderHeight,
+                    color: colors.surface,
+                    child: header,
+                  ),
                 ),
-              ),
-              SliverToBoxAdapter(child: body),
-              SliverToBoxAdapter(child: SizedBox(height: bottomInset + 24)),
-            ],
+                SliverToBoxAdapter(child: body),
+                SliverToBoxAdapter(child: SizedBox(height: bottomInset + 24)),
+              ],
+            ),
           ),
         );
       },
@@ -65,7 +71,11 @@ class BottomView extends StatelessWidget {
 }
 
 class _HeaderDelegate extends SliverPersistentHeaderDelegate {
-  _HeaderDelegate({required this.height, required this.color, required this.child});
+  _HeaderDelegate({
+    required this.height,
+    required this.color,
+    required this.child,
+  });
 
   final double height;
   final Color color;
@@ -78,7 +88,11 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return ColoredBox(
       color: color,
       child: Column(

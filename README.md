@@ -395,6 +395,18 @@ saved on the device only.
 
 ---
 
+## Platform notes
+
+- **Android** and **web** are tested; iOS configuration exists but is untested.
+- **Web specifics:**
+  - Elevation goes through the Maps JavaScript `ElevationService`, because the
+    Elevation REST API doesn't allow browser (CORS) requests.
+  - Your location and saved parking spots are drawn as colored dots, because
+    web maps ignore marker colors.
+  - Everything drawn over the map uses `pointer_interceptor`, so clicks don't
+    fall through to the map.
+  - Google sign-in uses Firebase's popup flow.
+
 ## Known limitations
 
 - **Getting back on track:** if you leave the route, navigation keeps snapping
@@ -406,3 +418,5 @@ saved on the device only.
   and the app tells you so.
 - **iOS** setup (the `Secrets.xcconfig` key path) is in place but untested,
   because development happens on Windows.
+- **Google sign-in on web** is configured (client ID in `web/index.html`) but
+  was not exercised end to end, because the popup needs a person to complete it.

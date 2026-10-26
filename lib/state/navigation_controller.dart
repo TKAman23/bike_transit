@@ -60,11 +60,33 @@ class NavigationController extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    _sub = _location.positions().listen(update, onError: (Object e) {
-      error = 'Location updates stopped: $e';
-      notifyListeners();
-    });
+    _listen();
   }
+
+  /// Subscribes to position updates, recovering from transient errors
+  /// (browsers in particular report occasional geolocation failures).
+  void _listen() {
+    _sub?.cancel();
+    _sub = _location.positions().listen(
+      (fix) {
+        if (error != null) error = null;
+        update(fix);
+      },
+      onError: (Object e) {
+        error = 'Waiting for GPS signal…';
+        notifyListeners();
+        _sub?.cancel();
+        _retry?.cancel();
+        _retry = Timer(const Duration(seconds: 2), () {
+          if (!_disposed) _listen();
+        });
+      },
+      cancelOnError: true,
+    );
+  }
+
+  Timer? _retry;
+  bool _disposed = false;
 
   double sectionStartM(int i) => _sectionStart[i];
 
@@ -210,6 +232,8 @@ class NavigationController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
+    _retry?.cancel();
     _sub?.cancel();
     super.dispose();
   }

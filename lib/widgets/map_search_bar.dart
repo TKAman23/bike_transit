@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:provider/provider.dart';
 
 import 'package:bike_transit/models/place.dart';
@@ -44,7 +45,13 @@ class _MapSearchBarState extends State<MapSearchBar> {
     if (widget.focusNode.hasFocus) {
       _load(_text.text);
     } else {
-      setState(() => _suggestions = []);
+      // In browsers the field blurs on pointer-down, before a suggestion's
+      // tap completes; keep the list briefly so that tap still lands.
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted && !widget.focusNode.hasFocus) {
+          setState(() => _suggestions = []);
+        }
+      });
     }
   }
 
@@ -57,7 +64,9 @@ class _MapSearchBarState extends State<MapSearchBar> {
   Future<void> _load(String value) async {
     final id = ++_query;
     setState(() => _searching = value.trim().isNotEmpty);
-    final results = await context.read<MapScreenController>().suggestions(value);
+    final results = await context.read<MapScreenController>().suggestions(
+      value,
+    );
     if (!mounted || id != _query) return;
     setState(() {
       _suggestions = widget.focusNode.hasFocus ? results : [];
@@ -177,17 +186,24 @@ class _MapSearchBarState extends State<MapSearchBar> {
                           return ListTile(
                             dense: true,
                             leading: Icon(switch (s.kind) {
-                              SuggestionKind.currentLocation => Icons.my_location,
+                              SuggestionKind.currentLocation =>
+                                Icons.my_location,
                               SuggestionKind.recent => Icons.history,
                               SuggestionKind.typed => Icons.search,
                               SuggestionKind.prediction => Icons.place_outlined,
                             }),
-                            title: Text(s.primaryText,
-                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                            title: Text(
+                              s.primaryText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             subtitle: s.secondaryText == null
                                 ? null
-                                : Text(s.secondaryText!,
-                                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                                : Text(
+                                    s.secondaryText!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                             onTap: () => _choose(s),
                           );
                         },
@@ -215,24 +231,35 @@ class _HamburgerMenu extends StatelessWidget {
         icon: const Icon(Icons.menu),
         onPressed: () => menu.isOpen ? menu.close() : menu.open(),
       ),
+      // On web, keep clicks on the menu from reaching the map underneath.
       menuChildren: [
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.person_outline),
-          onPressed: () => Navigator.pushNamed(context, '/profile'),
-          child: const Padding(
-            padding: EdgeInsets.only(right: 24),
-            child: Text('Profile'),
+        PointerInterceptor(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              MenuItemButton(
+                leadingIcon: const Icon(Icons.person_outline),
+                onPressed: () => Navigator.pushNamed(context, '/profile'),
+                child: const Padding(
+                  padding: EdgeInsets.only(right: 24),
+                  child: Text('Profile'),
+                ),
+              ),
+              MenuItemButton(
+                closeOnActivate: false,
+                leadingIcon: Icon(
+                  dark ? Icons.dark_mode : Icons.dark_mode_outlined,
+                ),
+                trailingIcon: Switch(
+                  value: dark,
+                  onChanged: (v) => context.read<ThemeService>().setDark(v),
+                ),
+                onPressed: () => context.read<ThemeService>().setDark(!dark),
+                child: const Text('Dark mode'),
+              ),
+            ],
           ),
-        ),
-        MenuItemButton(
-          closeOnActivate: false,
-          leadingIcon: Icon(dark ? Icons.dark_mode : Icons.dark_mode_outlined),
-          trailingIcon: Switch(
-            value: dark,
-            onChanged: (v) => context.read<ThemeService>().setDark(v),
-          ),
-          onPressed: () => context.read<ThemeService>().setDark(!dark),
-          child: const Text('Dark mode'),
         ),
       ],
     );

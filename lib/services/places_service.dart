@@ -142,7 +142,7 @@ class PlacesService {
           if (!(((r as Map)['types'] as List?) ?? const []).contains('plus_code')) r,
       ];
       if (results.isNotEmpty) {
-        final address = (results.first as Map)['formatted_address'] as String?;
+        final address = results.first['formatted_address'] as String?;
         if (address != null) {
           return Place(
             name: address.split(',').first,
