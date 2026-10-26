@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// Each rider can read and write only their own data:
+//   users/{uid}                      route preferences
+//   users/{uid}/bikeParking/{id}     saved bike-parking spots
+//   users/{uid}/recentPlaces/{id}    recently used places
+//   users/{uid}/trips/{id}           trip history + ride telemetry
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      match /{collection}/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid
+          && collection in ['bikeParking', 'recentPlaces', 'trips'];
+      }
+    }
+  }
+}

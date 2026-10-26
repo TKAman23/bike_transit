@@ -1,0 +1,5 @@
+{
+  "MAPS_API_KEY": "Google key for the Maps SDK and Firebase (may be Android/iOS-app restricted)",
+  "MAPS_SERVICES_KEY": "optional: Google key for Routes, Places (New), Geocoding, Elevation (API-restricted, not referrer-restricted)",
+  "OBA_API_KEY": "TEST"
+}

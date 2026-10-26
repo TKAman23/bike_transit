@@ -46,3 +46,8 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# API keys (see config/keys.example.json)
+/config/keys.json
+/ios/Flutter/Secrets.xcconfig
+/android/app/google-services.json

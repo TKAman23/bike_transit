@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "168682830341",
+    "project_id": "project-52242ff7-f3b2-4a18-bde",
+    "storage_bucket": "project-52242ff7-f3b2-4a18-bde.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:168682830341:android:72b60f7ecef2e698593a6c",
+        "android_client_info": {
+          "package_name": "com.example.bike_transit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "168682830341-51eo2cs4lkls0r87v29rur0fdhphbkkm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bike_transit",
+            "certificate_hash": "769cd1f15e37cd78603ae8468aba0627482657fe"
+          }
+        },
+        {
+          "client_id": "168682830341-cb831bltncov6g7ifdvl95e4jtf5k70e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "__MAPS_API_KEY__"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "168682830341-cb831bltncov6g7ifdvl95e4jtf5k70e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "168682830341-tsrqqpeavujlnfp8h15iamqac3q3mejf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.bikeTransit"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

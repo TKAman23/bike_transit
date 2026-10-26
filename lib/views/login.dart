@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 import 'package:bike_transit/services/auth_service.dart';
+import 'package:bike_transit/widgets/auth_scaffold.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,53 +26,44 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const _LoginHeader(),
-                  const SizedBox(height: 32),
-                  const Text(
-                    'Sign in or sign up below',
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  _LoginFields(
-                    emailController: _emailController,
-                    passwordController: _passwordController,
-                    authService: _authService,
-                    setLoading: setLoading,
-                    isLoading: isLoading(),
-                  ),
-
-                  const SizedBox(height: 24),
-                  const _OrDivider(),
-                  const SizedBox(height: 24),
-                  SignInButton(Buttons.google, onPressed: googleSignIn),
-                  SignInButton(
-                    Buttons.apple,
-                    onPressed: () {
-                      // TODO: Handle Apple sign-in.
-                    },
-                  ),
-                  SignInButton(
-                    Buttons.facebook,
-                    onPressed: () {
-                      // TODO: Handle Facebook sign-in.
-                    },
-                  ),
-                ],
+    return AuthScaffold(
+      children: [
+        const _LoginHeader(),
+        const SizedBox(height: 28),
+        Text(
+          'Sign in or register below',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-            ),
-          ),
         ),
-      ),
+        const SizedBox(height: 16),
+        _LoginFields(
+          emailController: _emailController,
+          passwordController: _passwordController,
+          authService: _authService,
+          setLoading: setLoading,
+          isLoading: isLoading(),
+        ),
+        const SizedBox(height: 4),
+        const ResetPasswordButton(),
+        const SizedBox(height: 16),
+        const _OrDivider(),
+        const SizedBox(height: 20),
+        Center(child: SignInButton(Buttons.google, onPressed: googleSignIn)),
+        //   SignInButton(
+        //     Buttons.apple,
+        //     onPressed: () {
+        //       // TODO: Handle Apple sign-in.
+        //     },
+        //   ),
+        //   SignInButton(
+        //     Buttons.facebook,
+        //     onPressed: () {
+        //       // TODO: Handle Facebook sign-in.
+        //     },
+        //   ),
+      ],
     );
   }
 
@@ -89,18 +80,10 @@ class _LoginPageState extends State<LoginPage> {
     if (err == null) {
       if (_authService.user != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Google sign-in was successful.',
-            ),
-          ),
+          SnackBar(content: Text('Google sign-in was successful.')),
         );
 
-        if (_isNewUser(_authService.user!)) {
-          // TODO: Transition to survey or onboarding flow for new users
-        } else {
-          // TODO: Transition to home page or update the state to reflect that the user is logged in.
-        }
+        Navigator.pushReplacementNamed(context, "/maps");
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -120,28 +103,24 @@ class _LoginPageState extends State<LoginPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Firebase error during Google sign-in: $err',
-          ),
-        ),
+        SnackBar(content: Text('Firebase error during Google sign-in: $err')),
       );
     }
   }
 
-  bool _isNewUser(User user) {
-    final DateTime? creationTime = user.metadata.creationTime;
-    final DateTime? lastSignInTime = user.metadata.lastSignInTime;
+  // bool _isNewUser(User user) {
+  //   final DateTime? creationTime = user.metadata.creationTime;
+  //   final DateTime? lastSignInTime = user.metadata.lastSignInTime;
 
-    if (creationTime == null || lastSignInTime == null) {
-      return false;
-    }
+  //   if (creationTime == null || lastSignInTime == null) {
+  //     return false;
+  //   }
 
-    // If the difference between creation time and last sign-in time
-    // is within a few seconds, it's a brand new registration.
-    final difference = lastSignInTime.difference(creationTime).abs();
-    return difference.inSeconds < 5;
-  }
+  //   // If the difference between creation time and last sign-in time
+  //   // is within a few seconds, it's a brand new registration.
+  //   final difference = lastSignInTime.difference(creationTime).abs();
+  //   return difference.inSeconds < 5;
+  // }
 
   void setLoading(bool value) {
     setState(() => _isLoading = value);
@@ -149,6 +128,28 @@ class _LoginPageState extends State<LoginPage> {
 
   bool isLoading() {
     return _isLoading;
+  }
+}
+
+class ResetPasswordButton extends StatefulWidget {
+  const ResetPasswordButton({super.key});
+
+  @override
+  State<ResetPasswordButton> createState() => _ResetPasswordButtonState();
+}
+
+class _ResetPasswordButtonState extends State<ResetPasswordButton> {
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () {
+        Navigator.pushNamed(context, '/forgot-password');
+      },
+      child: Text(
+        'Forgot Password?',
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+    );
   }
 }
 
@@ -162,6 +163,8 @@ class _LoginHeader extends StatelessWidget {
 
     return Column(
       children: [
+        const AppLogo(),
+        const SizedBox(height: 18),
         Text(
           'Welcome to',
           style: textTheme.titleMedium?.copyWith(
@@ -208,7 +211,13 @@ class _LoginFieldsState extends State<_LoginFields> {
           controller: widget.emailController,
           onTapOutside: (_) => FocusScope.of(context).unfocus(),
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(labelText: 'Email'),
+          decoration: InputDecoration(
+            prefixIcon: const Icon(Icons.email_outlined),
+            labelText: 'Email',
+            labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
         ),
         const SizedBox(height: 12),
         TextField(
@@ -216,7 +225,11 @@ class _LoginFieldsState extends State<_LoginFields> {
           obscureText: !_isPasswordVisible,
           onTapOutside: (_) => FocusScope.of(context).unfocus(),
           decoration: InputDecoration(
+            prefixIcon: const Icon(Icons.lock_outline),
             labelText: 'Password',
+            labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             suffixIcon: IconButton(
               tooltip: _isPasswordVisible ? 'Hide password' : 'Show password',
               onPressed: () {
@@ -231,39 +244,31 @@ class _LoginFieldsState extends State<_LoginFields> {
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton(
-            onPressed: emailPasswordSignIn,
-            style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-              minimumSize: const WidgetStatePropertyAll(Size.fromHeight(48)),
-            ),
-            child: widget.isLoading ? const SizedBox(
-              width: 20, 
-              height: 20, 
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
-            ) : Text(
-              'Sign In',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+          child: FilledButton(
+            onPressed: widget.isLoading ? null : emailPasswordSignIn,
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+            child: widget.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Sign In'),
           ),
         ),
+        const SizedBox(height: 10),
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton(
-            onPressed: emailPassowrdSignUp,
-            style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-              minimumSize: const WidgetStatePropertyAll(Size.fromHeight(48)),
-            ),
-            child: widget.isLoading ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            ) : Text(
-              'Register',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+          child: OutlinedButton(
+            onPressed: widget.isLoading ? null : emailPassowrdSignUp,
+            style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+            child: widget.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Register'),
           ),
         ),
       ],
@@ -271,6 +276,12 @@ class _LoginFieldsState extends State<_LoginFields> {
   }
 
   void emailPasswordSignIn() async {
+    if (widget.emailController.text.trim().isEmpty ||
+        widget.passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AuthService.messageFor('missing-email'))));
+      return;
+    }
     widget.setLoading(true);
     String? err = await widget._authService.signInWithEmailAndPassword(
       email: widget.emailController.text,
@@ -281,14 +292,10 @@ class _LoginFieldsState extends State<_LoginFields> {
     widget.setLoading(false);
 
     if (err == null && widget._authService.user != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Sign-in was successful.',
-          ),
-        ),
-      );
-      // TODO: Transition to home page or update the state to reflect that the user is logged in.
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Sign-in was successful.')));
+
+      Navigator.of(context).pushReplacementNamed('/maps');
     } else if (err == 'invalid-credential') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -297,69 +304,60 @@ class _LoginFieldsState extends State<_LoginFields> {
           ),
         ),
       );
-    } else if (err == 'unknown-error') {
+    } else if (err == 'unknown') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'An unknown error occurred. Please try again.',
-          ),
+          content: Text('An unknown error occurred. Please try again.'),
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Firebase error: $err',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(AuthService.messageFor(err))));
     }
   }
 
   void emailPassowrdSignUp() {
+    if (widget.emailController.text.trim().isEmpty ||
+        widget.passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(AuthService.messageFor('missing-email'))));
+      return;
+    }
     widget.setLoading(true);
-    widget._authService.signUpWithEmailAndPassword(
-      email: widget.emailController.text,
-      password: widget.passwordController.text,
-    ).then((err) {
-      if (!mounted) return;
-      widget.setLoading(false);
+    widget._authService
+        .signUpWithEmailAndPassword(
+          email: widget.emailController.text,
+          password: widget.passwordController.text,
+        )
+        .then((err) {
+          if (!mounted) return;
+          widget.setLoading(false);
 
-      if (err == null && widget._authService.user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Registration was successful.',
-            ),
-          ),
-        );
-        // TODO: Transition to survey or onboarding flow for new users.
-      } else if (err == 'email-already-in-use') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'This email is already in use. Please sign in instead.',
-            ),
-          ),
-        );
-      } else if (err == 'unknown-error') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'An unknown error occurred. Please try again.',
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Firebase error: $err',
-            ),
-          ),
-        );
-      }
-    });
+          if (err == null && widget._authService.user != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Registration was successful.')),
+            );
+
+            Navigator.of(context).pushReplacementNamed('/maps');
+          } else if (err == 'email-already-in-use') {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'This email is already in use. Please sign in instead.',
+                ),
+              ),
+            );
+          } else if (err == 'unknown') {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('An unknown error occurred. Please try again.'),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(AuthService.messageFor(err))));
+          }
+        });
   }
 }
 

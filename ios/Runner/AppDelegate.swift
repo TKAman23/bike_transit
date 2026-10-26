@@ -8,7 +8,10 @@ import GoogleMaps
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    GMSServices.provideAPIKey("AIzaSyAZ6_0Y0YrLjrDXqCujrc3jw_5e5CVCsHM")
+    // MAPS_API_KEY comes from the git-ignored ios/Flutter/Secrets.xcconfig via Info.plist.
+    if let key = Bundle.main.object(forInfoDictionaryKey: "MapsApiKey") as? String, !key.isEmpty {
+      GMSServices.provideAPIKey(key)
+    }
     
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
